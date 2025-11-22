@@ -1,5 +1,6 @@
 const TelegramBot = require("node-telegram-bot-api");
 const ping = require("ping");
+const pidusage = require("pidusage");
 
 const token = "7202428875:AAE0cj6sGDO1R0U5MCwBus8i353QvjHSc2Q";
 const chatId = "-1003148589452";
@@ -46,6 +47,21 @@ setInterval(checkPing, intervalPing);
 
 bot.onText(/\/status/, () => {
   bot.sendMessage(chatId, `Server Sepia ${targetIP} is ${isDown ? "down" : "up"}`);
+});
+
+bot.onText(/\/resource/, () => {
+  pidusage(process.pid, (err, stats) => {
+    if (err) return bot.sendMessage(chatId, "Error: " + err.message);
+
+    const cpu = stats.cpu.toFixed(2);
+    const mem = (stats.memory / 1024 / 1024).toFixed(2);
+
+    bot.sendMessage(
+      chatId,
+      `*Bot Resource Usage*\n\nCPU: *${cpu}%*\nRAM: *${mem} MB*\nPID: ${process.pid}`,
+      { parse_mode: "Markdown" }
+    );
+  });
 });
 
 console.log("Bot monitoring ping berjalan...");
